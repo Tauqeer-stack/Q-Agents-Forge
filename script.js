@@ -188,42 +188,59 @@ generateBtn.addEventListener('click', () => {
  * ROI CALCULATOR ENGINE
  * Assumes Q-Agentic Forge reduces proposal creation time by 90%
  */
-const propSlider = document.getElementById('prop-slider');
-const hoursSlider = document.getElementById('hours-slider');
-const rateSlider = document.getElementById('rate-slider');
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Grab all the slider inputs
+    const propSlider = document.getElementById('prop-slider');
+    const hoursSlider = document.getElementById('hours-slider');
+    const rateSlider = document.getElementById('rate-slider');
 
-const propVal = document.getElementById('prop-val');
-const hoursVal = document.getElementById('hours-val');
-const rateVal = document.getElementById('rate-val');
+    // 2. Grab the text spans where the current slider values are displayed
+    const propVal = document.getElementById('prop-val');
+    const hoursVal = document.getElementById('hours-val');
+    const rateVal = document.getElementById('rate-val');
 
-const timeSavedEl = document.getElementById('time-saved');
-const moneySavedEl = document.getElementById('money-saved');
+    // 3. Grab the big output displays
+    const timeSavedEl = document.getElementById('time-saved');
+    const moneySavedEl = document.getElementById('money-saved');
 
-function calculateROI() {
-    // Get values from sliders
-    const props = parseInt(propSlider.value);
-    const hours = parseInt(hoursSlider.value);
-    const rate = parseInt(rateSlider.value);
+    // 4. The main calculation function
+    function calculateROI() {
+        // Get the current number from each slider
+        const p = parseFloat(propSlider.value);
+        const h = parseFloat(hoursSlider.value);
+        const r = parseFloat(rateSlider.value);
 
-    // Update text labels above sliders
-    propVal.innerText = props;
-    hoursVal.innerText = hours;
-    rateVal.innerText = rate;
+        // Update the small blue numbers next to the sliders
+        propVal.textContent = p;
+        hoursVal.textContent = h;
+        rateVal.textContent = r;
 
-    // The Algorithm: Calculate total hours currently spent, then take 90% as "saved"
-    const currentTotalHours = props * hours;
-    const hoursSaved = Math.floor(currentTotalHours * 0.9);
-    const capitalSaved = hoursSaved * rate;
+        // The Math: Assuming AI saves 90% of manual effort
+        const totalHours = p * h;
+        const timeSaved = totalHours * 0.9;
+        const moneySaved = timeSaved * r;
 
-    // Inject into the UI with formatting
-    timeSavedEl.innerText = hoursSaved.toLocaleString() + " hrs";
-    moneySavedEl.innerText = "$" + capitalSaved.toLocaleString();
-}
+        // Update the big outputs and add commas for large numbers (e.g., 13,500)
+        timeSavedEl.textContent = Math.round(timeSaved).toLocaleString() + ' hrs';
+        moneySavedEl.textContent = '$' + Math.round(moneySaved).toLocaleString();
+        
+        // Bonus: Update the slider fill track dynamically (creates that purple fill effect)
+        updateSliderFill(propSlider);
+        updateSliderFill(hoursSlider);
+        updateSliderFill(rateSlider);
+    }
 
-// Listen for slider movement
-[propSlider, hoursSlider, rateSlider].forEach(slider => {
-    slider.addEventListener('input', calculateROI);
+    // Helper function to color the slider track to the left of the thumb
+    function updateSliderFill(slider) {
+        const value = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+        slider.style.background = `linear-gradient(to right, var(--accent-p) ${value}%, rgba(255, 255, 255, 0.1) ${value}%)`;
+    }
+
+    // 5. Listen for any movement on the sliders and run the calculation
+    propSlider.addEventListener('input', calculateROI);
+    hoursSlider.addEventListener('input', calculateROI);
+    rateSlider.addEventListener('input', calculateROI);
+
+    // Run it once when the page loads to set the initial state
+    calculateROI();
 });
-
-// Run once on load to establish baseline numbers
-calculateROI();
